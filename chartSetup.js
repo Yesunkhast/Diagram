@@ -19,9 +19,19 @@ const Utils = {
     rand: function(min, max) {
         return Math.floor(Math.random() * (max - min + 1) + min);
     },
-    days: function(cfg) {
-        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-        return days.slice(0, cfg.count);
+    hours: function(cfg) {
+        const hours = [];
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    
+        for (let i = 0; i < 7; i++) {
+            const dayHours = [];
+            for (let j = 0; j < 24; j++) {
+                dayHours.push(`${days[i]} ${j}:00`);
+            }
+            hours.push(dayHours);
+        }
+    
+        return hours.flat();
     },
     namedColor: function(index) {
         const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'grey'];
@@ -33,137 +43,78 @@ const Utils = {
     }
 };
 
-const actions = [
-    {
-      name: 'Add Dataset',
-      handler(chart) {
-        const data = chart.data;
-        const dsColor = Utils.namedColor(chart.data.datasets.length);
-        const newDataset = {
-          label: 'Dataset ' + (data.datasets.length + 1),
-          backgroundColor: Utils.transparentize(dsColor, 0.5),
-          borderColor: dsColor,
-          data: Utils.numbers({count: data.labels.length, min: -50, max: 50}),
-        };
-        chart.data.datasets.push(newDataset);
-        chart.update();
-      }
-    },
-    {
-      name: 'Add Data',
-      handler(chart) {
-        const data = chart.data;
-        if (data.datasets.length > 0) {
-          data.labels = Utils.days({count: data.labels.length + 1});
-  
-          for (let index = 0; index < data.datasets.length; ++index) {
-            data.datasets[index].data.push(Utils.rand(-50, 50));
-            // data nemeh heseg  "Utils.rand(-50, 50)" orond
-          }
-  
-          chart.update();
-        }
-      }
-    },
-    {
-      name: 'Remove Dataset',
-      handler(chart) {
-        chart.data.datasets.pop();
-        chart.update();
-      }
-    },
-    {
-      name: 'Remove Data',
-      handler(chart) {
-        chart.data.labels.splice(-1, 1);
-  
-        chart.data.datasets.forEach(dataset => {
-          dataset.data.pop();
-        });
-  
-        chart.update();
-      }
-    }
-  ];
-  
-  const initProgress = document.getElementById('initialProgress');
-  const progress = document.getElementById('animationProgress');
-  
-  const DATA_COUNT = 7;
-  const NUMBER_CFG = {count: DATA_COUNT, min: -50, max: 50};
-  
-  const labels = Utils.days({count: 7});
-  const data = {
+const initProgress = document.getElementById('initialProgress');
+const progress = document.getElementById('animationProgress');
+
+const DATA_COUNT = 168; // Assuming 24 hours of data
+const NUMBER_CFG = {count: DATA_COUNT, min: -50, max: 50};
+const labels = Utils.hours({count: DATA_COUNT});
+
+const data = {
     labels: labels,
     datasets: [
-      {
-        label: 'Temperature',
-        data: Utils.numbers(NUMBER_CFG),
-        borderColor: Utils.CHART_COLORS.red,
-        backgroundColor: Utils.transparentize(Utils.CHART_COLORS.red, 0.5),
-      },
-      {
-        label: 'Wind speed',
-        data: Utils.numbers(NUMBER_CFG),
-        borderColor: Utils.CHART_COLORS.blue,
-        backgroundColor: Utils.transparentize(Utils.CHART_COLORS.blue, 0.5),
-      }
+        {
+            label: 'Temperature',
+            data: 0,
+            borderColor: Utils.CHART_COLORS.red,
+            backgroundColor: Utils.transparentize(Utils.CHART_COLORS.red, 0.5),
+        }
     ]
-  };
+};
 
-  const config = {
+const config = {
     type: 'line',
     data: data,
     options: {
-      animation: {
-        duration: 2000,
-        onProgress: function(context) {
-          if (context.initial) {
-            initProgress.value = context.currentStep / context.numSteps;
-          } else {
-            progress.value = context.currentStep / context.numSteps;
-          }
+        animation: {
+            duration: 2000,
+            onProgress: function(context) {
+                if (context.initial) {
+                    initProgress.value = context.currentStep / context.numSteps;
+                } else {
+                    progress.value = context.currentStep / context.numSteps;
+                }
+            }
         },
-        // onComplete: function(context) {
-        //   if (context.initial) {
-        //     console.log('Initial animation finished');
-        //   } else {
-        //     console.log('animation finished');
-        //   }
-        // }
-      },
-      interaction: {
-        mode: 'nearest',
-        axis: 'x',
-        intersect: false
-      },
-      plugins: {
-        title: {
-          display: true,
-          text: "Daily temperture of City's"
-        }
-      },
+        interaction: {
+            mode: 'nearest',
+            axis: 'x',
+            intersect: false
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: "Hourly temperature of Ulaanbaatar"
+            }
+        },
     },
-  };
-const ctx = document.getElementById('myChart').getContext('2d');
-const chart = new Chart(ctx, config);
+};
 
-// function randomizeData() {
-//     actions[0].handler(chart);
-// }
+const id = [
+    'Asia%2FTokyo',
+    'America%2FNew_York',
+    'Europe%2FLondon',
+    'Asia%2FUlaanbaatar',
+];
 
-function addDataset() {
-    actions[0].handler(chart);
+async function getGraph() {
+    const ctx = document.getElementById('myChart').getContext('2d');
+    const chart = new Chart(ctx, config);
+
+    const data = await getWeather(id[3]); // Fetch weather data for Ulaanbaatar
+    // Assuming you have only one dataset for temperature in your chart
+    chart.data.datasets[0].data = data.hourly.temperature_2m;
+    chart.update();
 }
 
-function addData() {
-    actions[1].handler(chart);
-}
+getGraph();
 
-function removeDataset() {
-    actions[2].handler(chart);
-}
 
-function removeData() {
-    actions[3].handler(chart);
-}
+
+async function getWeather(city){
+    const result = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&hourly=temperature_2m&timezone=${city}`);
+    const data = await result.json();
+    weatherData = data.hourly.temperature_2m;
+    console.log(weatherData);
+    return data;
+};
