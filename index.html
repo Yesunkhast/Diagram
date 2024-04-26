@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="./img/Screenshot_2024-04-26_144535-removebg-preview.png"
+    />
+    <title>Weather Status</title>
+  </head>
+  <body>
+    <header>
+      <img
+        src="./img/Screenshot_2024-04-26_144535-removebg-preview.png"
+        alt="Weather"
+      />
+      <h2 class="title"><span>Weather</span> status</h2>
+    </header>
+
+    <div id="initialProgress">
+      <canvas id="animationProgress"></canvas>
+      <div>
+        <canvas id="myChart"></canvas>
+        <button onclick="addDataset()">Add Dataset</button>
+        <button onclick="addData()">Add Data</button>
+        <button onclick="removeDataset()">Remove Dataset</button>
+        <button onclick="removeData()">Remove Data</button>
+        <!-- <progress id="initialProgress" max="1" value="0"></progress>
+            <progress id="animationProgress" max="1" value="0"></progress> -->
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/chartSetup.js"></script>
+    <script src="/data.js"></script>
+  </body>
+</html>

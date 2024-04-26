@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Chart.js Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div>
+      <canvas id="myChart"></canvas>
+      <button onclick="randomizeData()">Randomize Data</button>
+      <button onclick="addDataset()">Add Dataset</button>
+      <button onclick="addData()">Add Data</button>
+      <button onclick="removeDataset()">Remove Dataset</button>
+      <button onclick="removeData()">Remove Data</button>
+      <progress id="initialProgress" max="1" value="0"></progress>
+      <progress id="animationProgress" max="1" value="0"></progress>
+    </div>
+    <script src="chartSetup.js"></script>
+  </body>
+</html>
